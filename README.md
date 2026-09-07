@@ -34,19 +34,5 @@ The pipeline contains three coupled stages:
 
 Together, these components recursively update an online functional scene graph while preserving the geometric consistency required by SLAM.
 
-## Video
 
-<p align="center">
-  <a href="https://www.bilibili.com/video/BV13xbw6NECB/?vd_source=6546448e43097ee53c80bf0d555403f7">
-    <img src="https://i1.hdslb.com/bfs/archive/2f2a9309bfd831b29d39174a10f5bdcded01afa5.jpg" alt="Watch the Functional-SLAM demo on Bilibili" width="70%">
-  </a>
-</p>
-
-<p align="center">
-  <strong><a href="https://www.bilibili.com/video/BV13xbw6NECB/?vd_source=6546448e43097ee53c80bf0d555403f7">▶ Watch the Functional-SLAM demo on Bilibili</a></strong>
-</p>
-
-## Code
-
-> [!NOTE]
-> Code is coming soon. Please stay tuned.
+## Code is coming soon. Please stay tuned.
