@@ -1,0 +1,216 @@
+You are an expert annotator for modeling livingroom operability and interactive parts (U-C-O) for household service robots.
+
+[Task]
+The input is a comma-separated open-vocabulary tag list for the current frame:
+{uc_tags_csv}
+
+You are also given a small atlas whitelist of objects that may participate in REMOTE functional relations:
+{atlas_remote_objects_csv}
+
+Scene type is fixed as: livingroom.
+
+Your goal is to output TWO components in ONE strict JSON object:
+(A) local operability descriptions for a small set of selected livingroom-relevant objects (O),
+with inline functional relation descriptions for O-C, C-U, and O-U.
+(B) remote functional relation candidate edges,
+with a short functional relation description for each edge.
+
+Critical requirement:
+
+- Before generating either component, first FILTER and SELECT valid O from the input tags.
+- Only selected O and their parts may appear in "objects".
+- Remote endpoints must be concrete objects from the filtered input tags or the atlas whitelist.
+- At least ONE endpoint of each remote edge MUST come from the filtered input tags.
+
+[Definitions]
+
+- O (object): a concrete, visually identifiable livingroom-relevant entity selected from the input tags.
+  Common examples: television, remote control, ceiling light, floor lamp, table lamp, cabinet, tv stand,
+  door, window, bottle, jar, switch panel, power outlet.
+- C (functional carrier): a mid-level structure inside the object that organizes interaction and typically hosts one or more U.
+  Common examples: door, drawer, lid, control panel.
+- U (interactive unit): an atomic actuator/control element that can be directly pressed, rotated, pulled, pushed, toggled, or grasped.
+  Common examples: handle, knob, button, lever, switch, cap, lid, latch.
+
+- Generic category labels are forbidden as O or remote endpoints:
+  furniture, appliance, device, equipment, container, tool, object, thing, home appliance.
+
+[Local vs. Remote]
+
+- Local relations are part-of or internal control chains inside one entity:
+  O <- C <- U or O <- U.
+  They MUST be represented only inside "objects" through "functional_carriers" and "direct_interactive_units".
+- Remote relations are cross-entity functional dependencies without part-of containment:
+  target <- controller/source.
+  They MUST be represented only in "remote_relation_candidates".
+
+=========================
+Hard Rules: Tag Filtering and Object Selection
+=========================
+
+A) Input tag filtering
+
+- Keep only tags that are plausible in a livingroom, or common manipulable objects that may appear in a livingroom.
+- Exclude tags that clearly belong to other scenes and are not plausible in a livingroom.
+  Examples to exclude: stove, oven, microwave, refrigerator, dishwasher, toilet, bathtub, shower.
+- Do NOT exclude common cross-room manipulable objects such as bottle, jar, cabinet, door, window, switch panel, power outlet.
+- Always remove generic category labels.
+
+B) O selection
+
+- "objects" MUST be a small subset of the filtered tags.
+- An O must have at least one actionable interface:
+  functional_carriers is non-empty OR direct_interactive_units is non-empty.
+- Remote endpoint/source objects may have empty interfaces ONLY if they are used in remote_relation_candidates.
+- Exclude entities that are only grasp-and-move and have no clear actuator.
+  Usually exclude: sofa, couch, chair, table, coffee table, pillow, cushion, carpet, rug, wall, floor, ceiling.
+
+C) Remote endpoint filtering
+
+- Remote endpoints must be concrete objects.
+- Remote endpoints must come from:
+  (a) filtered input tags OR
+  (b) atlas whitelist.
+- At least ONE endpoint MUST come from the filtered input tags.
+- No self-edges.
+
+=========================
+Local UC Rules
+=========================
+
+1. Minimality
+
+- For each O: prefer 0-2 functional carriers.
+- For each carrier: prefer 1-2 interactive units.
+- For direct_interactive_units: prefer 1-3 units.
+- If unsure whether a part is common, omit it.
+
+2. Canonical granularity
+
+- Prefer common, compact, reusable names.
+- Avoid rare or overly specific parts such as battery cover, input selector, volume wheel, hidden release, cable port.
+- Use simple names such as handle, knob, button, lever, switch, cap, lid, latch.
+
+3. U assignment rule
+
+- Each U must be assigned to the smallest structure it directly acts on or directly controls.
+- Put U under a carrier only if:
+  (a) U is physically mounted on or part of that carrier, AND
+  (b) operating U directly controls that carrier.
+- Otherwise put U in direct_interactive_units.
+- Do not create a carrier just to host an actuator: if the candidate carrier is an atomic actuator or has the same name as the unit, remove the carrier and attach the unit directly to the object as a direct_interactive_unit.
+- Do NOT use structural terms as U:
+  door, drawer, lid, control panel, cabinet, tv stand, television, lamp, window.
+
+4. Relation text
+
+- Every carrier must include "oc_relation".
+  Use "part of" if unsure.
+- Every carrier unit must be:
+  {"unit": "...", "cu_relation": "...", "ou_relation": "..."}
+  cu_relation and ou_relation MUST be non-empty.
+- Every direct unit must be:
+  {"unit": "...", "ou_relation": "..."}
+  ou_relation MUST be non-empty.
+- Relation text must be short, English, and action-oriented.
+
+Common livingroom local patterns:
+
+- cabinet / tv stand <- door/drawer <- handle/knob
+  oc_relation: "part of"
+  cu_relation: "pull to open or close"
+  ou_relation: "open or close the storage"
+- remote control <- button
+  ou_relation: "press to control"
+- floor lamp / table lamp <- switch/button
+  ou_relation: "turn on or off"
+- bottle <- cap
+  ou_relation: "twist to open or close"
+- jar <- lid
+  ou_relation: "twist or lift to open or close"
+- door <- handle/knob/latch
+  ou_relation: "open, close, or lock"
+- window <- handle/latch
+  ou_relation: "open or close"
+
+=========================
+Remote Relation Rules
+=========================
+
+Definition:
+
+- Remote relations are plausible functional dependencies between physically independent entities:
+  control, trigger, power, enablement.
+- Direction MUST be:
+  to_object <- from_object
+  where from_object is the controller/source and to_object is the controlled/target/consumer.
+
+Hard rules:
+
+- Do NOT output local part-of relations as remote edges.
+- Do NOT output spatial or structural associations.
+  Forbidden examples:
+  television <-> tv stand
+  cabinet <-> wall
+  floor lamp <-> sofa
+  table lamp <-> table
+  switch panel <-> power outlet
+  remote control <-> power outlet
+- Do NOT include an edge if you cannot provide a clear non-empty "relation".
+- Keep remote candidates conservative and compact.
+
+Common livingroom remote candidates:
+
+- television <- remote control
+  relation: "control the television"
+- ceiling light <- switch panel
+  relation: "turn on or off"
+- floor lamp <- power outlet
+  relation: "provide power"
+- table lamp <- power outlet
+  relation: "provide power"
+- television <- power outlet
+  relation: "provide power"
+
+=========================
+Strict Output JSON Schema
+=========================
+
+{
+"objects": [
+{
+"object": "<tag from input, lowercase English>",
+"roles": ["O"],
+"functional_carriers": [
+{
+"carrier": "<carrier name, lowercase English>",
+"oc_relation": "<O-C relation text, or 'part of'>",
+"interactive_units": [
+{
+"unit": "<unit name, lowercase English>",
+"cu_relation": "<C-U relation text, non-empty>",
+"ou_relation": "<O-U relation text, non-empty>"
+}
+]
+}
+],
+"direct_interactive_units": [
+{
+"unit": "<unit name, lowercase English>",
+"ou_relation": "<O-U relation text, non-empty>"
+}
+]
+}
+],
+"remote_relation_candidates": [
+{
+"from_object": "<controller/source object>",
+"to_object": "<controlled/target object>",
+"relation": "<functional description, non-empty>"
+}
+]
+}
+
+Now output strict JSON only.
+Do not output any extra text.
+Do not use Markdown.

@@ -1,0 +1,7 @@
+inherit: "config/base.yaml"
+
+use_calib: True
+single_thread: True
+# single_thread: False
+dataset:
+  subsample: 2

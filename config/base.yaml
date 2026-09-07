@@ -1,0 +1,184 @@
+use_calib: False
+single_thread: False
+dataset:
+  subsample: 1
+  img_downsample: 1
+  center_principle_point: True
+
+matching:
+  max_iter: 10
+  lambda_init: 1e-8
+  convergence_thresh: 1e-6
+  dist_thresh: 1e-1 # distance in 3D space
+  radius: 3
+  dilation_max: 5 # Right now starts from max and iteratively decreases until 1
+
+tracking:
+  min_match_frac: 0.05
+  max_iters: 50
+  C_conf: 0.0
+  Q_conf: 1.5
+  rel_error: 1e-3
+  delta_norm: 1e-3
+  huber: 1.345
+  match_frac_thresh: 0.333
+  sigma_ray: 0.003
+  sigma_dist: 1e+1
+  sigma_pixel: 1.0
+  sigma_depth: 1e+1 # NOTE: log-depth!
+  sigma_point: 0.05
+  pixel_border: -10 # Only in calib (negative means allow pixels outside image up to that distance)
+  depth_eps: 1e-6 # Only in calib case
+  filtering_mode: weighted_pointmap # recent, first, best_score, weighted_pointmap, weighted_spherical, indep_conf
+  filtering_score: median # median, mean (only used for filtering_mode=best_score)
+
+local_opt:
+  pin: 1
+  window_size: 1e+6
+  C_conf: 0.0
+  Q_conf: 1.5
+  min_match_frac: 0.1
+  pixel_border: -10 # Only in calib (negative means allow pixels outside image up to that distance)
+  depth_eps: 1e-6 # Only in calib case
+  max_iters: 10
+  sigma_ray: 0.003
+  sigma_dist: 1e+1
+  sigma_pixel: 1.0
+  sigma_depth: 1e+1 # NOTE: log-depth!
+  sigma_point: 0.05
+  delta_norm: 1e-8
+  use_cuda: True
+
+retrieval:
+  k: 3
+  min_thresh: 5e-3
+
+reloc:
+  min_match_frac: 0.3
+  strict: True
+
+# Node-aware place recognition (default disabled; baseline behavior preserved).
+node_place_recognition:
+  enabled: false
+  debug: true
+
+  # Relocalization rerank/filter
+  rerank_reloc: true
+  reloc_filter: true
+  reloc_top_k: 3
+  reloc_min_query_nodes: 2
+  reloc_min_score: 0.20
+  reloc_fallback_to_original: true
+
+  # Loop closure rerank/filter (more conservative)
+  rerank_loop: true
+  loop_filter: true
+  loop_top_k: 6
+  loop_min_query_nodes: 2
+  loop_min_score: 0.12
+  loop_fallback_to_original: true
+
+  # Node selection
+  use_roles: ["O", "C"]
+  exclude_roles: ["U"]
+  min_track_obs_count: 3
+  min_track_visible_count: 2
+  require_stable_geom: true
+  allowed_geom_sources:
+    ["stable_anchor_fused", "stable_anchor", "world_bbox", "world_centroid"]
+  min_view_score: 0.0
+
+  # Scoring weights (v1 legacy rerank/filter)
+  weight_node_id_overlap: 0.55
+  weight_label_overlap: 0.30
+  weight_role_overlap: 0.10
+  weight_count_coverage: 0.05
+  object_role_bonus: 1.2
+  carrier_role_bonus: 0.8
+
+  # ---- v2 SUPPLEMENT-only mode (functional-graph aware) ----
+  loop_add_functional_candidates: false
+  reloc_add_functional_candidates: false
+  loop_add_top_k: 2
+  reloc_add_top_k: 3
+  loop_min_temporal_gap: 10
+  reloc_high_score_threshold: 0.4
+  reloc_require_frame_id_match: true
+
+  use_functional_chains: true
+  use_direct_uo: true
+  use_remote_relations: false
+  use_spatial_sanity: true
+
+  # v2 weighted score
+  weight_node_id: 0.35
+  weight_chain_id: 0.30
+  weight_chain_label_idf: 0.15
+  weight_direct: 0.08
+  weight_spatial: 0.07
+  weight_remote: 0.05
+  spatial_distance_max_m: 5.0
+
+  acceptance:
+    min_shared_node_ids: 2
+    min_shared_chain_ids: 1
+    chain_label_score_threshold: 0.5
+    spatial_distance_max_m: 5.0
+
+  # ---- v3 Verified Functional Loop Expansion (default disabled) ----
+  functional_loop_verify_individually: false
+  functional_loop_min_match_frac: 0.12
+  functional_loop_expand_window: 2
+  functional_loop_support_min_match_frac: 0.08
+  functional_loop_max_anchor_per_kf: 1
+  functional_loop_max_support_edges_per_anchor: 2
+  functional_loop_min_temporal_gap: 20
+  functional_loop_min_token_idf_score: 0.50
+  functional_loop_min_strong_token_count: 1
+  functional_loop_require_o_node: true
+  use_functional_token_idf: false
+  token_idf_min_df: 1
+  token_idf_common_clip: 0.15
+  log_functional_geometry_results: true
+  functional_loop_deficit_gate_retrieval: false
+  functional_loop_preserve_original_strengthening_when_no_deficit: true
+
+  # ---- v4 Functional-Guided Loop Strengthening (default disabled) ----
+  functional_strengthen_original_retrieval: false
+  functional_original_anchor_min_score: 0.25
+  functional_original_anchor_min_shared_oc_nodes: 2
+  functional_original_anchor_min_shared_chain_ids: 1
+  functional_original_anchor_require_geometry_pass: true
+  functional_original_expand_window: 2
+  functional_original_support_min_match_frac: 0.06
+  functional_original_max_anchors_per_kf: 2
+  functional_original_max_support_edges_per_anchor: 2
+  functional_supplement_expand_enabled: true
+
+  # ---- Functionalized Object-Topology Loop Retrieval (default disabled) ----
+  object_topology_enabled: false
+  object_topology_include_u: true
+  object_topology_max_graphlets_per_kf: 64
+  object_topology_compare_graphlets_per_kf: 24
+  object_topology_top_k: 3
+  functionalized_topology_enabled: false
+  functionalized_topology_top_k: 3
+  topology_functional_supplement_enabled: false
+  topology_functional_supplement_deficit_only: false
+  topology_functional_deficit_recent_kf: 10
+  topology_functional_deficit_min_long_range_edges: 1
+  topology_functional_deficit_min_temporal_gap: 15
+  topology_functional_max_supplement_edges_per_kf: 1
+  topology_functional_audition_enabled: false
+  topology_functional_audition_min_match_frac: 0.05
+  topology_functional_select_min_match_frac: 0.08
+  topology_functional_select_min_utility: 0.35
+  topology_functional_utility_weight_geom: 0.45
+  topology_functional_utility_weight_semantic: 0.25
+  topology_functional_utility_weight_temporal: 0.20
+  topology_functional_utility_weight_novelty: 0.10
+  topology_functional_redundancy_penalty: 0.25
+  topology_functional_temporal_gap_norm: 50
+  functional_strengthen_supplement_anchors: false
+
+  jsonl_debug_enabled: true

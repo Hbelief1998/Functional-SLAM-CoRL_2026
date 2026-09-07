@@ -1,0 +1,28 @@
+inherit: "config/eval_calib.yaml"
+
+dataset:
+  subsample: 1
+  center_principle_point: True
+
+matching:
+  dist_thresh: 0.2
+
+tracking:
+  min_match_frac: 0.02
+  match_frac_thresh: 0.4
+  Q_conf: 1.0
+  lm_damping: 1e-4
+  refine_window: 8
+  refine_min_match_frac: 0.01
+  refine_rounds: 3
+  max_kf_gap: 1
+
+local_opt:
+  min_match_frac: 0.05
+
+retrieval:
+  k: 8
+
+reloc:
+  min_match_frac: 0.3 # Require at least 30% successful pixel matches.
+  strict: True

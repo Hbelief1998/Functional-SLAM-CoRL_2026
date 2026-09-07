@@ -1,0 +1,227 @@
+You are an expert in household-service robot manipulation and operability modeling.
+
+[Task]
+Generate a compact “Bathroom Global Operability Atlas (prior)” for a hierarchical functional scene graph.
+You must output a strict JSON object containing:
+
+- "objects": bathroom-relevant O entries with their typical functional carriers (C) and interactive units (U).
+- "remote_relation_candidates": directed remote functional candidate edges (E_rem).
+  Each remote edge MUST include a short functional description field "relation".
+- Local functional relationship descriptions MUST be written inline in the O/C/U hierarchy:
+  carrier.oc_relation, unit.cu_relation, unit.ou_relation, and direct_unit.ou_relation.
+
+[Definitions]
+
+- O (object): an operability-relevant bathroom entity modeled as a node in the atlas.
+  There are TWO kinds of O:
+  (A) Directly manipulable objects: must have actionable interfaces.
+  (B) Remote endpoint/source objects: may have no local actuators, but can appear as controller/source or target in remote relations
+  (e.g., ceiling light, exhaust fan, power outlet). If an object appears in remote_relation_candidates, it MUST appear in "objects".
+
+  To reduce omissions, think by categories. Examples are not exhaustive:
+  • major fixtures: toilet, sink, bathtub, shower
+  • plumbing/control fixtures: faucet, shower valve
+  • furniture & storage: bathroom cabinet, vanity cabinet
+  • hygiene containers/tools: bottle, jar, trash can
+  • room infrastructure: ceiling light, switch panel, power outlet, door, window
+
+- C (functional carrier): a mid-level structure within an object that organizes interaction and typically hosts one or more U
+  (e.g., tank, door, drawer, lid, control panel).
+- U (interactive unit): an atomic actuator that can be directly pressed/turned/pulled/pushed/toggled/grasped
+  (e.g., handle, knob, button, lever, switch, cap, lid, stopper, pump, latch, pedal).
+
+- Generic category labels are NOT allowed as object names:
+  do NOT use vague classes such as "fixture", "bathroom fixture", "appliance", "device", "equipment", "container", "tool", etc.
+
+[Local vs. Remote — representation rule]
+
+- Local relations (E_loc) are part-of or internal control chains inside one entity, typically O <- C <- U or O <- U.
+  Local relations MUST be expressed ONLY via the O/C/U hierarchy inside each object entry:
+  "functional_carriers" and "direct_interactive_units".
+  Examples:
+  - toilet <- tank <- lever/button
+  - bathroom cabinet <- drawer/door <- handle/knob
+  - bottle <- cap
+  - trash can <- lid <- pedal, or trash can <- pedal
+
+- Remote relations (E_rem) are cross-entity functional dependencies WITHOUT part-of containment.
+  Remote relations MUST be expressed ONLY via "remote_relation_candidates".
+  Examples:
+  - ceiling light <- switch panel
+  - sink <- faucet
+  - bathtub <- faucet
+  - shower <- shower valve
+
+=========================
+General Constraints (High Priority)
+=========================
+
+1. Directly manipulable objects must have actionable interfaces
+
+- For kind (A) objects: include an O only if it has at least one actionable interface:
+  functional_carriers is non-empty OR direct_interactive_units is non-empty.
+- Exclude entities that are only “grasp-and-move” with no clear actuator or functional interface.
+- Examples usually to exclude, unless a clear actuator is visible/annotated:
+  towel, towel rack, mirror, drain, mat, soap bar, toothbrush holder, shelf, wall, floor, ceiling.
+
+2. Remote endpoint/source objects exception
+
+- For kind (B) remote endpoint/source objects, e.g., ceiling light, power outlet:
+  they may have empty functional_carriers and empty direct_interactive_units.
+  However, include them ONLY if they are used as endpoints in remote_relation_candidates.
+
+3. Minimality
+
+- For each O: prefer 0–2 carriers.
+- For each carrier: prefer 1–2 interactive units.
+- For direct_interactive_units: prefer 1–3 units.
+- If unsure whether something is common, omit it.
+- Do not guess long-tail or rare parts.
+
+4. Canonical granularity
+
+- Prefer high-frequency, generic, generalizable names.
+- Avoid rare or overly specific parts such as "overflow drain cover", "filter latch", "hidden release", "water reservoir lid".
+- Do not invent overly fine-grained carrier names when a simpler carrier is sufficient.
+
+5. Naming
+
+- object / carrier / unit names MUST be lowercase English with spaces.
+- Do not use hyphens.
+- interactive units should be short generic labels:
+  handle, knob, button, lever, switch, cap, lid, stopper, pump, latch, pedal.
+- Avoid fine-grained variants such as "flush-button", "temperature-knob", "water-flow-lever", "power-switch".
+  Use "button", "knob", "lever", or "switch" instead.
+
+6. C validity rule
+
+- C must be a structural carrier, not an atomic actuator.
+- Allowed C examples: door, drawer, tank, lid, control panel.
+- Forbidden C labels: handle, knob, button, lever, switch, cap, stopper, pump, latch, pedal, drain.
+- A carrier MUST NOT have the same name as one of its interactive units.
+- For simple actuator objects, put the actuator in direct_interactive_units instead of functional_carriers:
+  faucet <- handle/lever/knob, shower valve <- handle/lever/knob, bottle <- cap, switch panel <- switch,
+  sink <- stopper, bathtub <- stopper.
+
+7. U assignment rule
+
+- Each U must be assigned to the smallest structure it directly acts on or directly controls.
+- A U may be placed under a carrier’s interactive_units ONLY if both conditions hold:
+  (a) the U physically belongs to that carrier or is mounted on that carrier; AND
+  (b) actuating the U directly controls that carrier, e.g., open/close, lock/unlock, flush, dispense, adjust.
+- Otherwise, if the U is used to manipulate the whole object, grasp/carry/move it, or is not specific to a single carrier,
+  then it MUST go to the object’s direct_interactive_units.
+- U must be an atomic actuator.
+  Do NOT use structural terms as U:
+  door, drawer, tank, faucet, showerhead, shower valve, control panel, sink, bathtub, toilet.
+
+=========================
+Remote relation candidates (E_rem only; directed edges)
+=========================
+
+Add a top-level field "remote_relation_candidates" listing ONLY remote functional relation candidates.
+
+Hard rules:
+
+- Only include plausible remote functional candidates between physically independent entities:
+  cross-entity dependencies such as control, trigger, power, water flow, drainage enablement.
+- Direction MUST be: target <- controller/source.
+  In JSON semantics: to_object <- from_object.
+- from_object MUST be the controller/source.
+- to_object MUST be the controlled/consumer/affected target.
+- Endpoints must be concrete objects, NOT generic category labels.
+- Every endpoint string MUST match exactly one "object" name in the "objects" list.
+- Do NOT include local part-of relations here.
+- Do NOT include purely spatial/structural associations such as support, placement, adjacency, containment, layout, or co-location.
+  Forbidden examples:
+  - toilet <-> sink
+  - bathtub <-> shower
+  - cabinet <-> sink
+  - mirror <-> sink
+  - switch panel <-> power outlet
+  - showerhead <-> shower
+- Keep the remote list compact.
+
+Recommended bathroom remote patterns:
+
+- ceiling light <- switch panel relation: "turn on or off"
+- sink <- faucet relation: "control the water flow"
+- bathtub <- faucet relation: "fill with water"
+- shower <- shower valve relation: "control the water flow"
+
+Remote functional description requirements:
+
+- Each remote relation candidate MUST include a short non-empty "relation".
+- Use short action phrases:
+  "turn on or off", "provide power", "control the water flow", "fill with water".
+
+=========================
+Local relation descriptions
+=========================
+
+Local functional relationship descriptions MUST be written inline:
+
+- For each carrier C under each object O, include:
+  "oc_relation": a short O-C description. If unsure, use "part of".
+- For each unit U under each carrier C, use:
+  {"unit": "...", "cu_relation": "...", "ou_relation": "..."}
+  cu_relation and ou_relation MUST be non-empty.
+- For each direct unit U under each object O, use:
+  {"unit": "...", "ou_relation": "..."}
+  ou_relation MUST be non-empty.
+
+Style examples:
+
+- tank - toilet: "part of"
+- lever - tank: "push or pull to flush"
+- handle - door/drawer: "pull to open or close"
+- knob - control panel: "rotate to adjust the setting"
+- button - control panel: "press to start or stop"
+- cap - bottle: "twist to open or close"
+- stopper - sink/bathtub: "open or close the drain"
+- pedal - trash can: "press to open the lid"
+
+=========================
+Output JSON schema (strict)
+=========================
+
+{
+"scene_type": "bathroom",
+"atlas_version": "bathroom_v2_ocu_relation_text",
+"objects": [
+{
+"object": "<object name>",
+"roles": ["O"],
+"functional_carriers": [
+{
+"carrier": "<carrier name>",
+"oc_relation": "<O-C description, or 'part of'>",
+"interactive_units": [
+{
+"unit": "<unit name>",
+"cu_relation": "<C-U functional description, non-empty>",
+"ou_relation": "<O-U functional description, non-empty>"
+}
+]
+}
+],
+"direct_interactive_units": [
+{
+"unit": "<unit name>",
+"ou_relation": "<O-U functional description, non-empty>"
+}
+]
+}
+],
+"remote_relation_candidates": [
+{
+"from_object": "<controller/source object>",
+"to_object": "<controlled/target object>",
+"relation": "<functional description, non-empty>"
+}
+]
+}
+
+Now output strict JSON only.
+Do not output any extra text.
+Do not use Markdown.

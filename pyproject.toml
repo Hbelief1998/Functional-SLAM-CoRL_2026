@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools==70.0.0", "torch"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "functional-slam"
+version = "0.0.1"
+description = "Interaction-aware SLAM with online functional scene graphs"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "numpy==1.26.4",
+    "scipy",
+    "scikit-learn",
+    "einops",
+    "pyrealsense2",
+    "evo",
+    "natsort",
+    "lietorch @ git+https://github.com/princeton-vl/lietorch.git",
+    "plyfile",
+    "opencv-python",
+    "Pillow",
+    "PyYAML",
+    "matplotlib",
+    "trimesh[easy]",
+    "moderngl==5.12.0",
+    "moderngl-window==2.4.6",
+    "glfw",
+    "pyglm",
+    "msgpack",
+    "imgui==2.0.0",
+    "orjson",
+    "timm>=1.0.17",
+    "transformers>=4.25.1",
+    "fairscale==0.4.4",
+    "ftfy==6.1.1",
+    "regex",
+    "iopath>=0.1.10",
+    "huggingface-hub>=0.22",
+    "tqdm",
+    "roma",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mast3r_slam*"]
+namespaces = false
+
+[tool.setuptools.package-data]
+mast3r_slam = ["semantic/prompts/*.txt"]

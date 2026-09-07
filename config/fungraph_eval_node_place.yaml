@@ -1,0 +1,97 @@
+inherit: "config/fungraph_eval.yaml"
+
+node_place_recognition:
+  enabled: true
+  debug: true
+
+  # v2: SUPPLEMENT only — never delete original MASt3R retrieval candidates.
+  loop_add_functional_candidates: true
+  reloc_add_functional_candidates: true
+  loop_add_top_k: 4
+  reloc_add_top_k: 3
+  loop_min_temporal_gap: 10
+  reloc_high_score_threshold: 0.4
+  reloc_require_frame_id_match: true
+
+  # New object-topology / functionalized-topology supplement streams.
+  object_topology_enabled: true
+  object_topology_include_u: true
+  object_topology_max_graphlets_per_kf: 64
+  object_topology_compare_graphlets_per_kf: 24
+  object_topology_top_k: 3
+  functionalized_topology_enabled: true
+  functionalized_topology_top_k: 3
+  topology_functional_supplement_enabled: true
+  topology_functional_supplement_deficit_only: true
+  topology_functional_deficit_recent_kf: 10
+  topology_functional_deficit_min_long_range_edges: 1
+  topology_functional_deficit_min_temporal_gap: 15
+  topology_functional_max_supplement_edges_per_kf: 1
+  topology_functional_audition_enabled: true
+  topology_functional_audition_min_match_frac: 0.05
+  topology_functional_select_min_match_frac: 0.08
+  topology_functional_select_min_utility: 0.35
+  topology_functional_utility_weight_geom: 0.45
+  topology_functional_utility_weight_semantic: 0.25
+  topology_functional_utility_weight_temporal: 0.20
+  topology_functional_utility_weight_novelty: 0.10
+  topology_functional_redundancy_penalty: 0.25
+  topology_functional_temporal_gap_norm: 50
+
+  # ---- v4 Functional-Guided Loop Strengthening ----
+  functional_strengthen_original_retrieval: true
+  functional_original_anchor_min_score: 0.25
+  functional_original_anchor_min_shared_oc_nodes: 2
+  functional_original_anchor_min_shared_chain_ids: 1
+  functional_original_anchor_require_geometry_pass: true
+  functional_original_expand_window: 2
+  functional_original_support_min_match_frac: 0.06
+  functional_original_max_anchors_per_kf: 2
+  functional_original_max_support_edges_per_anchor: 2
+  functional_supplement_expand_enabled: true
+  functional_strengthen_supplement_anchors: false
+
+  # ---- v3 Verified Functional Loop Expansion (secondary supplement channel) ----
+  functional_loop_verify_individually: true
+  functional_loop_min_match_frac: 0.10
+  functional_loop_expand_window: 2
+  functional_loop_support_min_match_frac: 0.06
+  functional_loop_max_anchor_per_kf: 1
+  functional_loop_max_support_edges_per_anchor: 2
+  functional_loop_min_temporal_gap: 20
+  functional_loop_min_token_idf_score: 0.35
+  functional_loop_min_strong_token_count: 1
+  functional_loop_require_o_node: true
+  use_functional_token_idf: true
+  token_idf_min_df: 1
+  token_idf_common_clip: 0.15
+  log_functional_geometry_results: true
+  functional_loop_deficit_gate_retrieval: true
+  functional_loop_preserve_original_strengthening_when_no_deficit: true
+
+  # Disable v1 rerank/filter so originals are NEVER deleted/top_k'd.
+  rerank_loop: false
+  rerank_reloc: false
+  loop_filter: false
+  reloc_filter: false
+
+  use_functional_chains: true
+  use_direct_uo: true
+  use_remote_relations: false
+  use_spatial_sanity: true
+
+  weight_node_id: 0.35
+  weight_chain_id: 0.30
+  weight_chain_label_idf: 0.15
+  weight_direct: 0.08
+  weight_spatial: 0.07
+  weight_remote: 0.05
+  spatial_distance_max_m: 5.0
+
+  acceptance:
+    min_shared_node_ids: 2
+    min_shared_chain_ids: 1
+    chain_label_score_threshold: 0.5
+    spatial_distance_max_m: 5.0
+
+  jsonl_debug_enabled: true

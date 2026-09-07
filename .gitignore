@@ -1,0 +1,36 @@
+# Python and native build artifacts
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+build/
+dist/
+
+# Environments and local credentials
+.env
+.venv/
+venv/
+mast3r_slam/semantic/deepseek_secrets.py
+
+# Model weights and downloaded data
+/checkpoints
+*.ckpt
+*.pth
+*.pt
+*.onnx
+/datasets/
+/data/
+
+# Runtime outputs
+/logs/
+/outputs/
+/results/
+*.ply
+*.mp4
+*.jsonl
+
+# Editors and operating systems
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
