@@ -1,7 +1,3 @@
-"""0108-1050-semantic-restart"""
-
-
-
 import argparse
 import datetime
 import json

@@ -66,7 +66,7 @@ CUDA 12.4, and an NVIDIA RTX 3090. A CUDA-capable GPU is required. Use a CUDA
 toolkit compatible with the selected PyTorch build.
 
 ```bash
-git clone --recursive git@github.com:Hbelief1998/Functional-SLAM-CoRL_2026.git
+git clone --recursive https://github.com/Hbelief1998/Functional-SLAM-CoRL_2026.git
 cd Functional-SLAM-CoRL_2026
 
 conda create -n functional-slam python=3.11 -y
@@ -82,6 +82,10 @@ pip install -e recognize-anything
 pip install -e sam3
 pip install --no-build-isolation -e .
 ```
+
+The native extensions require the CUDA compiler in addition to the PyTorch
+CUDA runtime. Verify that `nvcc --version` succeeds and set `CUDA_HOME` to a
+compatible CUDA toolkit if it is not detected automatically.
 
 If the repository was cloned without `--recursive`, initialize Eigen before
 building the CUDA backend:
