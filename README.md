@@ -12,6 +12,16 @@
 
 Functional-SLAM is an interaction-aware SLAM framework that continuously builds and maintains a functional 3D scene graph during online exploration. In addition to estimating camera motion and scene geometry, it represents objects, robot-operable interaction elements, and the functional relations between them.
 
+## Dataset
+
+<p align="center">
+  <a href="https://huggingface.co/datasets/xg-123/Functional-SLAM-dataset">
+    <img src="https://img.shields.io/badge/Hugging%20Face-Functional--SLAM--dataset-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black" alt="Functional-SLAM dataset on Hugging Face">
+  </a>
+</p>
+
+The curated RGB sequences used in our evaluation—18 from FunGraph3D and 18 from SceneFun3D—are publicly available in the [Functional-SLAM dataset](https://huggingface.co/datasets/xg-123/Functional-SLAM-dataset) on Hugging Face.
+
 ## Motivation
 
 Geometric, semantic, and object-level SLAM systems provide increasingly rich scene representations, but they generally do not model the small interaction elements and functional relations required for fine-grained robotic interaction. Recognizing a kettle, for example, is insufficient for reasoning about which handle should be grasped to lift or pour it.
