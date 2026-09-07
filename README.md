@@ -20,7 +20,7 @@ Functional-SLAM is an interaction-aware SLAM framework that continuously builds 
   </a>
 </p>
 
-The curated RGB sequences used in our evaluation—18 from FunGraph3D and 18 from SceneFun3D—are publicly available in the [Functional-SLAM dataset](https://huggingface.co/datasets/xg-123/Functional-SLAM-dataset) on Hugging Face.
+The RGB sequences used in our evaluation—18 from FunGraph3D and 18 from SceneFun3D—are publicly available in the [Functional-SLAM dataset](https://huggingface.co/datasets/xg-123/Functional-SLAM-dataset) on Hugging Face.
 
 ## Motivation
 
