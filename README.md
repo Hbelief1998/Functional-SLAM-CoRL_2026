@@ -12,9 +12,10 @@
 </p>
 
 <p align="center">
+  <a href="https://arxiv.org/abs/2609.07497"><img src="https://img.shields.io/badge/Paper-arXiv%3A2609.07497-B31B1B?logo=arxiv&logoColor=white" alt="Paper"></a>
   <a href="https://huggingface.co/datasets/xg-123/Functional-SLAM-dataset"><img src="https://img.shields.io/badge/Dataset-Hugging%20Face-FFD21E?logo=huggingface&logoColor=black" alt="Dataset"></a>
   <a href="https://www.bilibili.com/video/BV13xbw6NECB/"><img src="https://img.shields.io/badge/Demo-Bilibili-00A1D6?logo=bilibili&logoColor=white" alt="Demo video"></a>
-  <img src="https://img.shields.io/badge/Conference-CoRL%202026-6A5ACD" alt="CoRL 2026">
+  <a href="https://2026.corl.org/"><img src="https://img.shields.io/badge/Conference-CoRL%202026-6A5ACD" alt="CoRL 2026"></a>
 </p>
 
 Functional-SLAM is an interaction-aware SLAM system that constructs an online
